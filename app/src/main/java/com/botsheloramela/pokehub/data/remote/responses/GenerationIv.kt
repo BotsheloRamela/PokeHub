@@ -1,7 +1,7 @@
 package com.botsheloramela.pokehub.data.remote.responses
 
 data class GenerationIv(
-    val diamond-pearl: DiamondPearl,
-    val heartgold-soulsilver: HeartgoldSoulsilver,
+    val DiamondPearl: DiamondPearl,
+    val heartgoldSoulsilver: HeartgoldSoulsilver,
     val platinum: Platinum
 )
