@@ -166,7 +166,8 @@ fun PokemonList(
                 navController = navController,
                 modifier = Modifier.fillMaxSize(),
                 onLoadMore = { viewModel.loadPokemonPaginated() },
-                endReached = endReached
+                endReached = endReached,
+                isLoading = isLoading
             )
         }
         if (endReached) {
@@ -239,7 +240,8 @@ fun DisplayPokemonGrid(
     navController: NavController,
     modifier: Modifier = Modifier,
     onLoadMore: () -> Unit,
-    endReached: Boolean
+    endReached: Boolean,
+    isLoading: Boolean
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -252,7 +254,7 @@ fun DisplayPokemonGrid(
                 modifier = modifier.padding(8.dp)
             )
             // If we're at the last item and there are more to load, trigger onLoadMore
-            if (pokemon == pokemonList.last() && !endReached) onLoadMore()
+            if (pokemon == pokemonList.last() && !endReached && !isLoading) onLoadMore()
         }
     }
 }
