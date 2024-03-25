@@ -54,7 +54,8 @@ import com.botsheloramela.pokehub.data.model.PokemonItemModel
 
 @Composable
 fun PokeListScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: PokeListViewModel = hiltViewModel()
 ) {
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -83,7 +84,7 @@ fun PokeListScreen(
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
             ) {
-                // viewModel.searchPokemonList(it)
+                 viewModel.searchPokemonList(it)
             }
             Spacer(modifier = Modifier.height(16.dp))
             PokemonList(navController = navController)
@@ -121,7 +122,7 @@ fun SearchBar(
                 .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
                 .padding(horizontal = 20.dp, vertical = 14.dp)
                 .onFocusChanged {
-                    isHintDisplayed = !it.isFocused
+                    isHintDisplayed = !it.isFocused && searchText.isEmpty()
                 }
         )
 
@@ -145,14 +146,15 @@ fun PokemonList(
     val loadError by remember { viewModel.loadError }
     val isLoading by remember { viewModel.isLoading }
     val endReached by remember { viewModel.endReached }
+    val isSearching by remember { viewModel.isSearching }
 
     Box(
-        contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
         if (isLoading) {
             CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.Center)
             )
         }
         if (loadError.isNotEmpty()) {
@@ -167,14 +169,16 @@ fun PokemonList(
                 modifier = Modifier.fillMaxSize(),
                 onLoadMore = { viewModel.loadPokemonPaginated() },
                 endReached = endReached,
-                isLoading = isLoading
+                isLoading = isLoading,
+                isSearching = isSearching
             )
         }
         if (endReached) {
             Text(
                 text = "You have reached the end of the list",
                 color = Color.Gray,
-                fontSize = 20.sp
+                fontSize = 20.sp,
+                modifier = Modifier.align(Alignment.Center)
             )
         }
     }
@@ -241,7 +245,8 @@ fun DisplayPokemonGrid(
     modifier: Modifier = Modifier,
     onLoadMore: () -> Unit,
     endReached: Boolean,
-    isLoading: Boolean
+    isLoading: Boolean,
+    isSearching: Boolean
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -254,7 +259,7 @@ fun DisplayPokemonGrid(
                 modifier = modifier.padding(8.dp)
             )
             // If we're at the last item and there are more to load, trigger onLoadMore
-            if (pokemon == pokemonList.last() && !endReached && !isLoading) onLoadMore()
+            if (pokemon == pokemonList.last() && !endReached && !isLoading && !isSearching) onLoadMore()
         }
     }
 }

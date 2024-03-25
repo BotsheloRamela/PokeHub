@@ -14,6 +14,7 @@ import com.botsheloramela.pokehub.util.Constants.PAGE_SIZE
 import com.botsheloramela.pokehub.util.Constants.POKEMON_IMAGE_URL_BASE
 import com.botsheloramela.pokehub.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
@@ -30,8 +31,69 @@ class PokeListViewModel @Inject constructor(
     var isLoading = mutableStateOf(false)
     var endReached = mutableStateOf(false)
 
+    private var cachedPokemonList = emptyList<PokemonItemModel>()
+    private var isSearchStarting = true
+    val isSearching = mutableStateOf(false)
+
     init {
         loadPokemonPaginated()
+    }
+
+    fun searchPokemonList(query: String) {
+        viewModelScope.launch(Dispatchers.Default) {
+            // If the query is empty, reset the search and return to the original Pokemon list.
+            if (query.isEmpty()) {
+                resetSearch()
+                return@launch
+            }
+
+            // Determine which list to search based on whether the search has just started or not.
+            val listToSearch = if (isSearchStarting) {
+                pokemonList.value // If search has just started, use the original Pokemon list.
+            } else {
+                cachedPokemonList // If not, use the previously cached list.
+            }
+
+            // Filter the list based on the search query.
+            val results = listToSearch.filter {
+                it.name.contains(query.trim(), ignoreCase = true) || it.id.toString() == query.trim()
+            }
+
+            // If the search has just started, cache the original Pokemon list.
+            if (isSearchStarting) cachePokemonList()
+
+            // Update the Pokemon list with the search results.
+            updatePokemonList(results)
+        }
+    }
+
+    /**
+     * Resets the search to the initial state.
+     * Restores the original Pokemon list and sets [isSearching] to false.
+     */
+    private fun resetSearch() {
+        pokemonList.value = cachedPokemonList
+        isSearching.value = false
+        isSearchStarting = true
+    }
+
+    /**
+     * Caches the current Pokemon list.
+     * Sets [isSearchStarting] to false, indicating that the search has started.
+     */
+    private fun cachePokemonList() {
+        cachedPokemonList = pokemonList.value
+        isSearchStarting = false
+    }
+
+    /**
+     * Updates the Pokemon list with the provided results.
+     * Sets [pokemonList] to the filtered results and [isSearching] to true.
+     * @param results The filtered list of Pokemon based on the search query.
+     */
+    private fun updatePokemonList(results: List<PokemonItemModel>) {
+        pokemonList.value = results
+        isSearching.value = true
     }
 
     fun loadPokemonPaginated() {
@@ -39,6 +101,7 @@ class PokeListViewModel @Inject constructor(
             try {
                 isLoading.value = true
                 when (val result = repository.getPokemonList(PAGE_SIZE, currentPage * PAGE_SIZE)) {
+
                     is Resource.Success -> {
                         endReached.value = currentPage * PAGE_SIZE >= result.data.count
                         val pagedPokemonList = result.data.results.map { pokemon ->
@@ -54,9 +117,11 @@ class PokeListViewModel @Inject constructor(
                         loadError.value = ""
                         pokemonList.value += pagedPokemonList
                     }
+
                     is Resource.Error -> {
                         loadError.value = result.message
                     }
+
                     else -> {
                         loadError.value = "An unexpected error occurred."
                     }
