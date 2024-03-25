@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,17 +15,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -39,7 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
 import com.botsheloramela.pokehub.data.model.PokemonItemModel
 
@@ -77,6 +85,8 @@ fun PokeListScreen(
             ) {
                 // viewModel.searchPokemonList(it)
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            PokemonList(navController = navController)
         }
     }
 }
@@ -126,6 +136,49 @@ fun SearchBar(
     // TODO: Add filter icon / button
 }
 
+@Composable
+fun PokemonList(
+    navController: NavController,
+    viewModel: PokeListViewModel = hiltViewModel()
+) {
+    val pokemonList by remember { viewModel.pokemonList }
+    val loadError by remember { viewModel.loadError }
+    val isLoading by remember { viewModel.isLoading }
+    val endReached by remember { viewModel.endReached }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        if (loadError.isNotEmpty()) {
+            ErrorRetrySection(error = loadError) {
+                viewModel.loadPokemonPaginated()
+            }
+        }
+        if (pokemonList.isNotEmpty()) {
+            DisplayPokemonGrid(
+                pokemonList = pokemonList,
+                navController = navController,
+                modifier = Modifier.fillMaxSize(),
+                onLoadMore = { viewModel.loadPokemonPaginated() },
+                endReached = endReached
+            )
+        }
+        if (endReached) {
+            Text(
+                text = "You have reached the end of the list",
+                color = Color.Gray,
+                fontSize = 20.sp
+            )
+        }
+    }
+}
+
 
 @Composable
 fun DisplayPokemonItem(
@@ -136,9 +189,7 @@ fun DisplayPokemonItem(
 ) {
 
     val defaultDominantColor = MaterialTheme.colorScheme.surface
-    var dominantColor by remember {
-        mutableStateOf(defaultDominantColor)
-    }
+    var dominantColor by remember { mutableStateOf(defaultDominantColor) }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -152,17 +203,21 @@ fun DisplayPokemonItem(
     ) {
         Column {
 
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(pokemonItem.imageUrl)
                     .crossfade(true)
-                    .target {
-                        viewModel.calculateDominantColor(it) { color ->
-                            dominantColor = color
-                        }
-                    }
                     .build(),
                 contentDescription = pokemonItem.name,
+                loading = {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary, modifier = Modifier.scale(0.5F)
+                    )
+                },
+                success = { success ->
+                    viewModel.calculateDominantColor(success.result.drawable) { dominantColor = it }
+                    SubcomposeAsyncImageContent()
+                },
                 modifier = Modifier
                     .size(120.dp)
                     .align(Alignment.CenterHorizontally)
@@ -182,20 +237,48 @@ fun DisplayPokemonItem(
 fun DisplayPokemonGrid(
     pokemonList: List<PokemonItemModel>,
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLoadMore: () -> Unit,
+    endReached: Boolean
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(4.dp),
     ) {
         items(pokemonList) { pokemon ->
             DisplayPokemonItem(
-                pokemonItem  = pokemon,
+                pokemonItem = pokemon,
                 navController = navController,
-                modifier = modifier
+                modifier = modifier.padding(8.dp)
             )
+            // If we're at the last item and there are more to load, trigger onLoadMore
+            if (pokemon == pokemonList.last() && !endReached) onLoadMore()
         }
     }
+}
+
+@Composable
+fun ErrorRetrySection(
+    error: String,
+    onRetry: () -> Unit
+) {
+    Column {
+        Text(
+            text = error,
+            color = Color.Red,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        Button(
+            onClick = { onRetry() },
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Retry")
+        }
+    }
+
 }
 
 
