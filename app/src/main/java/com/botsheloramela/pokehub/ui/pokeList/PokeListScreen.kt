@@ -1,14 +1,23 @@
 package com.botsheloramela.pokehub.ui.pokeList
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,14 +26,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.botsheloramela.pokehub.data.model.PokemonItemModel
 
 
 @Composable
@@ -36,7 +53,9 @@ fun PokeListScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         Column (
-            modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
         ){
             Spacer(modifier = Modifier.height(20.dp))
             Text(
@@ -90,7 +109,7 @@ fun SearchBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
-                .padding(horizontal = 20.dp,vertical = 14.dp)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
                 .onFocusChanged {
                     isHintDisplayed = !it.isFocused
                 }
@@ -101,6 +120,79 @@ fun SearchBar(
                 text = hint,
                 style = TextStyle(color = Color.Gray.copy(alpha = 0.5f)),
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+            )
+        }
+    }
+    // TODO: Add filter icon / button
+}
+
+
+@Composable
+fun DisplayPokemonItem(
+    pokemonItem: PokemonItemModel,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: PokeListViewModel = hiltViewModel()
+) {
+
+    val defaultDominantColor = MaterialTheme.colorScheme.surface
+    var dominantColor by remember {
+        mutableStateOf(defaultDominantColor)
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .aspectRatio(1f)
+            .background(dominantColor)
+            .clickable {
+                navController.navigate("pokemon_details_screen/${dominantColor.toArgb()}/${pokemonItem.name}")
+            }
+    ) {
+        Column {
+
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(pokemonItem.imageUrl)
+                    .crossfade(true)
+                    .target {
+                        viewModel.calculateDominantColor(it) { color ->
+                            dominantColor = color
+                        }
+                    }
+                    .build(),
+                contentDescription = pokemonItem.name,
+                modifier = Modifier
+                    .size(120.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = pokemonItem.name,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun DisplayPokemonGrid(
+    pokemonList: List<PokemonItemModel>,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(16.dp),
+    ) {
+        items(pokemonList) { pokemon ->
+            DisplayPokemonItem(
+                pokemonItem  = pokemon,
+                navController = navController,
+                modifier = modifier
             )
         }
     }
