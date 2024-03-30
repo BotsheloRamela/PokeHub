@@ -1,4 +1,4 @@
-package com.botsheloramela.pokehub.ui.pokeDetail
+package com.botsheloramela.pokehub.ui.pokemonDetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

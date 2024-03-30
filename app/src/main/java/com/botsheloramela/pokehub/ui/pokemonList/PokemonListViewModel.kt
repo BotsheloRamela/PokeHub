@@ -1,4 +1,4 @@
-package com.botsheloramela.pokehub.ui.pokeList
+package com.botsheloramela.pokehub.ui.pokemonList
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -16,11 +16,10 @@ import com.botsheloramela.pokehub.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class PokeListViewModel @Inject constructor(
+class PokemonListViewModel @Inject constructor(
     private val repository: PokemonRepository
 ) : ViewModel() {
 

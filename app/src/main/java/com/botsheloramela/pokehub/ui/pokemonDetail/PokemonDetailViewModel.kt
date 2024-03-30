@@ -1,4 +1,4 @@
-package com.botsheloramela.pokehub.ui.pokeDetail
+package com.botsheloramela.pokehub.ui.pokemonDetail
 
 import androidx.lifecycle.ViewModel
 import com.botsheloramela.pokehub.data.remote.responses.Pokemon
