@@ -5,6 +5,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
@@ -133,12 +134,24 @@ class PokemonListViewModel @Inject constructor(
         }
     }
 
+    private fun darkenColor(color: Color): Color {
+        val hsv = FloatArray(3)
+        android.graphics.Color.colorToHSV(color.toArgb(), hsv)
+
+        // Reduce brightness by the specified percentage
+        hsv[2] *= (1f - 0.2f)
+
+        return Color(android.graphics.Color.HSVToColor(hsv))
+    }
+
     fun calculateDominantColor(drawable: Drawable, onFinish: (Color) -> Unit) {
         val bmp = (drawable as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
 
         Palette.from(bmp).generate { palette ->
             palette?.dominantSwatch?.rgb?.let { colorValue ->
-                onFinish(Color(colorValue))
+                val color = Color(colorValue)
+                val darkenedColor = darkenColor(color)
+                onFinish(darkenedColor)
             }
         }
     }
