@@ -1,13 +1,23 @@
 package com.botsheloramela.pokehub.ui.pokemonDetail
 
+import androidx.compose.animation.Animatable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,10 +26,17 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,8 +52,12 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.botsheloramela.pokehub.data.remote.responses.Pokemon
+import com.botsheloramela.pokehub.data.remote.responses.Type
 import com.botsheloramela.pokehub.util.Resource
+import com.botsheloramela.pokehub.util.parseTypeToColor
+import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.math.round
 
 @Composable
 fun PokemonDetailScreen(
@@ -54,26 +75,21 @@ fun PokemonDetailScreen(
     Box(modifier = Modifier
         .fillMaxSize()
         .background(dominantColor)
-        .padding(bottom = 16.dp)
     ) {
         PokemonDetailAppBar(
-            navController = navController,
-            pokemonName = pokemonName,
+            navController = navController
         )
 
         PokemonDetailStateWrapper(
             pokemonInfo = pokemonInfo,
+            dominantColor = dominantColor,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    top = topPadding + pokemonImageSize / 2f,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 16.dp
+                    top = topPadding + pokemonImageSize / 0.6f,
                 )
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(16.dp)
                 .align(Alignment.BottomCenter),
             loadingModifier = Modifier
                 .size(100.dp)
@@ -89,9 +105,16 @@ fun PokemonDetailScreen(
         Box(contentAlignment = Alignment.TopCenter,
             modifier = Modifier.fillMaxSize()
         ) {
-
             if (pokemonInfo is Resource.Success) {
                 pokemonInfo.data.sprites.other.home.let {
+                    PokemonSummarySection(
+                        pokemonName = pokemonInfo.data.name,
+                        pokemonId = pokemonInfo.data.id,
+                        pokemonTypes = pokemonInfo.data.types,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset(y = 70.dp)
+                    )
                      SubcomposeAsyncImage(
                          model = ImageRequest.Builder(LocalContext.current)
                              .data(it.front_default)
@@ -100,9 +123,81 @@ fun PokemonDetailScreen(
                          contentDescription = pokemonInfo.data.name,
                          modifier = Modifier
                              .size(pokemonImageSize)
-                             .offset(y = 60.dp)
+                             .offset(y = 180.dp)
                      )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun PokemonSummarySection(
+    pokemonName: String,
+    pokemonId: Int,
+    pokemonTypes: List<Type>,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
+    ) {
+        Box(modifier = Modifier.weight(1f)) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .wrapContentWidth(Alignment.Start)
+            ) {
+                Text(
+                    text = pokemonName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() },
+                    color = Color.White,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+                PokemonTypeSection(types = pokemonTypes)
+            }
+        }
+        
+        Text(
+            text = "#$pokemonId",
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Right,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+    }
+}
+
+@Composable
+fun PokemonTypeSection(types: List<Type>) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        types.forEach { type ->
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .background(color = parseTypeToColor(type), shape = RoundedCornerShape(30.dp))
+                    .height(35.dp)
+            ) {
+                Text(
+                    text = type.type.name.replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(
+                            Locale.ROOT
+                        ) else it.toString()
+                    },
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
+                )
             }
         }
     }
@@ -112,31 +207,25 @@ fun PokemonDetailScreen(
 @Composable
 fun PokemonDetailAppBar(
     navController: NavController,
-    pokemonName: String,
 ) {
     CenterAlignedTopAppBar(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
         ),
-        title = {
-            Text(
-                text = pokemonName.capitalize(Locale.ROOT),
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
+        title = {Text( text = "")},
         navigationIcon = {
             Icon(
                 imageVector = Icons.Filled.ArrowBack,
                 contentDescription = "Back",
                 tint = Color.White,
-                modifier = Modifier.size(24.dp).clickable {
-                    navController.popBackStack()
-                }
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable {
+                        navController.popBackStack()
+                    }
             )
         },
     )
@@ -145,12 +234,17 @@ fun PokemonDetailAppBar(
 @Composable
 fun PokemonDetailStateWrapper(
     pokemonInfo: Resource<Pokemon>,
+    dominantColor: Color,
     modifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
 ) {
     when (pokemonInfo) {
         is Resource.Success -> {
-            // Display Pokemon Info
+            PokemonDetailSection(
+                pokemonInfo = pokemonInfo.data,
+                dominantColor = dominantColor,
+                modifier = modifier
+            )
         }
         is Resource.Error -> {
             Text(
@@ -165,5 +259,145 @@ fun PokemonDetailStateWrapper(
                 modifier = loadingModifier
             )
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PokemonDetailSection(
+    pokemonInfo: Pokemon,
+    dominantColor: Color,
+    modifier: Modifier
+) {
+    val tabItems = listOf("Info", "Evolution", "Moves")
+
+    val pagerState = rememberPagerState(
+        pageCount = { tabItems.size }
+    )
+
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 28.dp)
+    ) {
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier
+                        .tabIndicatorOffset(tabPositions[pagerState.currentPage])
+                        .width(0.dp)
+                        .height(0.dp)
+                )
+            },
+            divider = { },
+        ) {
+            tabItems.forEachIndexed { index, title ->
+                val tabColor = remember {
+                    Animatable(Color.White)
+                }
+
+                LaunchedEffect(key1 = pagerState.currentPage == index) {
+                    tabColor.animateTo(
+                        if (pagerState.currentPage == index) dominantColor else Color.Transparent
+                    )
+                }
+
+                Tab(
+                    text = {
+                        Text(
+                            title,
+                            color = if (pagerState.currentPage == index) Color.White else Color.Gray,
+                            modifier = Modifier
+                                .background(
+                                    color = tabColor.value, shape = RoundedCornerShape(30.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                        )
+                       },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp)
+
+        ) {page ->
+            Column {
+                if (page == 0) {
+                    PokemonDetailDataSection(
+                        pokemonWeight = pokemonInfo.weight,
+                        pokemonHeight = pokemonInfo.height
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PokemonDetailDataSection(
+    pokemonWeight: Int,
+    pokemonHeight: Int,
+) {
+
+    val pokemonWeightInKg = remember {
+        round(pokemonWeight * 100f) / 1000f
+    }
+
+    val pokemonHeightInMeters = remember {
+        round(pokemonHeight * 100f) / 1000f
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        PokemonDetailDataItem(
+            dataTitle = "Height",
+            dataValue = "${pokemonHeightInMeters}m",
+        )
+        PokemonDetailDataItem(
+            dataTitle = "Weight",
+            dataValue = "${pokemonWeightInKg}kg",
+        )
+    }
+}
+
+@Composable
+fun PokemonDetailDataItem(
+    dataTitle: String,
+    dataValue: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+    ) {
+        Text(
+            text = dataTitle,
+            color = Color.Gray,
+            fontSize = 12.sp
+        )
+        Text(
+            text = dataValue,
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
