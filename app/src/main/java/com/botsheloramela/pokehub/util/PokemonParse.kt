@@ -1,8 +1,8 @@
 package com.botsheloramela.pokehub.util
 
 import androidx.compose.ui.graphics.Color
-import com.botsheloramela.pokehub.data.remote.responses.Stat
-import com.botsheloramela.pokehub.data.remote.responses.Type
+import com.botsheloramela.pokehub.data.model.Stat
+import com.botsheloramela.pokehub.data.model.Type
 import com.botsheloramela.pokehub.ui.theme.AtkColor
 import com.botsheloramela.pokehub.ui.theme.DefColor
 import com.botsheloramela.pokehub.ui.theme.HPColor

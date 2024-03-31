@@ -1,7 +1,7 @@
 package com.botsheloramela.pokehub.ui.pokemonDetail
 
 import androidx.lifecycle.ViewModel
-import com.botsheloramela.pokehub.data.remote.responses.Pokemon
+import com.botsheloramela.pokehub.data.model.Pokemon
 import com.botsheloramela.pokehub.data.repository.PokemonRepository
 import com.botsheloramela.pokehub.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel

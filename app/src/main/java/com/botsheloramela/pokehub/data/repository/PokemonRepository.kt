@@ -1,8 +1,8 @@
 package com.botsheloramela.pokehub.data.repository
 
+import com.botsheloramela.pokehub.data.model.Pokemon
+import com.botsheloramela.pokehub.data.model.PokemonList
 import com.botsheloramela.pokehub.data.remote.PokeApi
-import com.botsheloramela.pokehub.data.remote.responses.Pokemon
-import com.botsheloramela.pokehub.data.remote.responses.PokemonList
 import com.botsheloramela.pokehub.util.Resource
 import dagger.hilt.android.scopes.ActivityScoped
 import javax.inject.Inject

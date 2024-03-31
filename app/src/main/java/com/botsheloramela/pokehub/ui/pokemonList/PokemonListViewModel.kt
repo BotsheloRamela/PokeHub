@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import com.botsheloramela.pokehub.data.model.Pokemon
 import com.botsheloramela.pokehub.data.model.PokemonItemModel
 import com.botsheloramela.pokehub.data.repository.PokemonRepository
 import com.botsheloramela.pokehub.util.Constants.PAGE_SIZE

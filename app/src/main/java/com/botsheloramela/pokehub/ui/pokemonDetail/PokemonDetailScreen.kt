@@ -19,11 +19,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -57,15 +55,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.botsheloramela.pokehub.data.remote.responses.Pokemon
-import com.botsheloramela.pokehub.data.remote.responses.Type
+import com.botsheloramela.pokehub.data.model.Pokemon
+import com.botsheloramela.pokehub.data.model.Type
 import com.botsheloramela.pokehub.util.Resource
 import com.botsheloramela.pokehub.util.parseStatToAbbr
 import com.botsheloramela.pokehub.util.parseTypeToColor
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.round
-import kotlin.math.roundToInt
 
 @Composable
 fun PokemonDetailScreen(

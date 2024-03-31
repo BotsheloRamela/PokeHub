@@ -1,7 +1,7 @@
 package com.botsheloramela.pokehub.data.remote
 
-import com.botsheloramela.pokehub.data.remote.responses.Pokemon
-import com.botsheloramela.pokehub.data.remote.responses.PokemonList
+import com.botsheloramela.pokehub.data.model.Pokemon
+import com.botsheloramela.pokehub.data.model.PokemonList
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

@@ -1,4 +1,4 @@
-package com.botsheloramela.pokehub.data.remote.responses
+package com.botsheloramela.pokehub.data.model
 
 data class Result(
     val name: String,
