@@ -460,6 +460,7 @@ fun PokemonStat(
                 text = (currentPercent.value * statMaxValue).toInt().toString(),
                 color = Color.LightGray,
                 fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.width(28.dp)
             )
         }

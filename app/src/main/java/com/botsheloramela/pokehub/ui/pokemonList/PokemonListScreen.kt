@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -191,7 +192,7 @@ fun DisplayPokemonItem(
     viewModel: PokemonListViewModel = hiltViewModel()
 ) {
 
-    val defaultDominantColor = MaterialTheme.colorScheme.surface
+    val defaultDominantColor = MaterialTheme.colorScheme.onPrimary
     var dominantColor by remember { mutableStateOf(defaultDominantColor) }
 
     Box(
@@ -199,7 +200,11 @@ fun DisplayPokemonItem(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .aspectRatio(1f)
-            .background(dominantColor)
+            .background(
+                Brush.verticalGradient(
+                    listOf(dominantColor, defaultDominantColor)
+                )
+            )
             .clickable {
                 navController.navigate("pokemon_details_screen/${dominantColor.toArgb()}/${pokemonItem.name}")
             }
