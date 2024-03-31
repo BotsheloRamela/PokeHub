@@ -140,7 +140,7 @@ class PokemonListViewModel @Inject constructor(
         android.graphics.Color.colorToHSV(color.toArgb(), hsv)
 
         // Reduce brightness by the specified percentage
-        hsv[2] *= (1f - 0.2f)
+        hsv[2] *= (1f - 0.15f)
 
         return Color(android.graphics.Color.HSVToColor(hsv))
     }
