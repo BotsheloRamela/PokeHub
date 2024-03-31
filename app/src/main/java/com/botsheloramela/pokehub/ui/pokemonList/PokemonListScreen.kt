@@ -24,7 +24,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -253,7 +257,11 @@ fun DisplayPokemonGrid(
                 modifier = modifier.padding(8.dp)
             )
             // If we're at the last item and there are more to load, trigger onLoadMore
-            if (pokemon == pokemonList.last() && !endReached && !isLoading && !isSearching) onLoadMore()
+            if (pokemon == pokemonList.last() && !endReached && !isLoading && !isSearching) {
+                LaunchedEffect(key1 = true) {
+                    onLoadMore()
+                }
+            }
         }
     }
 }

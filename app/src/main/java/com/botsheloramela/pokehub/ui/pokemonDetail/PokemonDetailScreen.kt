@@ -1,6 +1,8 @@
 package com.botsheloramela.pokehub.ui.pokemonDetail
 
 import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,6 +10,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,9 +19,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -35,7 +41,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,10 +60,12 @@ import coil.request.ImageRequest
 import com.botsheloramela.pokehub.data.remote.responses.Pokemon
 import com.botsheloramela.pokehub.data.remote.responses.Type
 import com.botsheloramela.pokehub.util.Resource
+import com.botsheloramela.pokehub.util.parseStatToAbbr
 import com.botsheloramela.pokehub.util.parseTypeToColor
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.round
+import kotlin.math.roundToInt
 
 @Composable
 fun PokemonDetailScreen(
@@ -85,10 +93,8 @@ fun PokemonDetailScreen(
             dominantColor = dominantColor,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    top = topPadding + pokemonImageSize / 0.6f,
-                )
-                .clip(RoundedCornerShape(20.dp))
+                .padding(top = topPadding + pokemonImageSize / 0.6f)
+                .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .align(Alignment.BottomCenter),
             loadingModifier = Modifier
@@ -340,8 +346,11 @@ fun PokemonDetailSection(
                 if (page == 0) {
                     PokemonDetailDataSection(
                         pokemonWeight = pokemonInfo.weight,
-                        pokemonHeight = pokemonInfo.height
+                        pokemonHeight = pokemonInfo.height,
+                        dominantColor = dominantColor
                     )
+                    Spacer(modifier = Modifier.height(28.dp))
+                    PokemonBaseStats(pokemonInfo = pokemonInfo, dominantColor = dominantColor)
                 }
             }
         }
@@ -352,6 +361,7 @@ fun PokemonDetailSection(
 fun PokemonDetailDataSection(
     pokemonWeight: Int,
     pokemonHeight: Int,
+    dominantColor: Color
 ) {
 
     val pokemonWeightInKg = remember {
@@ -369,10 +379,12 @@ fun PokemonDetailDataSection(
         PokemonDetailDataItem(
             dataTitle = "Height",
             dataValue = "${pokemonHeightInMeters}m",
+            dominantColor = dominantColor
         )
         PokemonDetailDataItem(
             dataTitle = "Weight",
             dataValue = "${pokemonWeightInKg}kg",
+            dominantColor = dominantColor
         )
     }
 }
@@ -381,6 +393,7 @@ fun PokemonDetailDataSection(
 fun PokemonDetailDataItem(
     dataTitle: String,
     dataValue: String,
+    dominantColor: Color,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -395,9 +408,107 @@ fun PokemonDetailDataItem(
         )
         Text(
             text = dataValue,
-            color = MaterialTheme.colorScheme.primary,
+            color = dominantColor,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold
         )
+    }
+}
+
+@Composable
+fun PokemonStat(
+    statName: String,
+    statValue: Int,
+    statMaxValue: Int,
+    dominantColor: Color,
+    animationDuration: Int = 1000,
+    animationDelay: Int = 0
+) {
+    var animationPlayed by remember {
+        mutableStateOf(false)
+    }
+
+    val currentPercent = animateFloatAsState(
+        targetValue = if (animationPlayed) {
+            (statValue / statMaxValue.toFloat()).coerceIn(0f, 1f)
+        } else 0f,
+        label = "",
+        animationSpec = tween(
+            durationMillis = animationDuration,
+            delayMillis = animationDelay
+        )
+    )
+
+    LaunchedEffect(key1 = true) {
+        animationPlayed = true
+    }
+
+    Row (
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = statName,
+                color = Color.Gray,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.width(54.dp)
+            )
+            Text(
+                text = (currentPercent.value * statMaxValue).toInt().toString(),
+                color = Color.LightGray,
+                fontSize = 12.sp,
+                modifier = Modifier.width(28.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .height(12.dp)
+                .fillMaxWidth()
+                .background(
+                    color = Color.LightGray.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(16.dp)
+                )
+        ) {
+            Box (
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(currentPercent.value * statMaxValue / 100)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(dominantColor)
+            )
+        }
+    }
+}
+
+@Composable
+fun PokemonBaseStats(
+    pokemonInfo: Pokemon,
+    animationDelayPerItem: Int = 100,
+    dominantColor: Color
+) {
+    val maxBaseState = remember {
+        pokemonInfo.stats.maxOf { it.base_stat }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        pokemonInfo.stats.forEachIndexed { index, stat ->
+            PokemonStat(
+                statName = parseStatToAbbr(stat),
+                statValue = stat.base_stat,
+                statMaxValue = maxBaseState,
+                dominantColor = dominantColor,
+                animationDelay = index * animationDelayPerItem,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
