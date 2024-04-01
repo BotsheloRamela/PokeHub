@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,8 +19,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,6 +40,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -106,16 +111,8 @@ fun SearchBar(
     }
 
     Box(modifier = modifier) {
-        // TODO: Add search icon
-        BasicTextField(
-            value = searchText,
-            maxLines = 1,
-            singleLine = true,
-            onValueChange = {
-                searchText = it
-                onSearch(it)
-            },
-            textStyle = TextStyle(color = Color.Black),
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
@@ -123,13 +120,36 @@ fun SearchBar(
                 .onFocusChanged {
                     isHintDisplayed = !it.isFocused && searchText.isEmpty()
                 }
-        )
+        ) {
+            // Search Icon
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(end = 16.dp)
+            )
+
+            // Text Field
+            BasicTextField(
+                value = searchText,
+                maxLines = 1,
+                singleLine = true,
+                onValueChange = {
+                    searchText = it
+                    onSearch(it)
+                },
+                textStyle = TextStyle(color = Color.Gray),
+                modifier = Modifier
+                    .weight(1f),
+                cursorBrush = SolidColor(Color.Gray)
+            )
+        }
 
         if (isHintDisplayed) {
             Text(
                 text = hint,
                 style = TextStyle(color = Color.Gray.copy(alpha = 0.5f)),
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 52.dp)
             )
         }
     }
