@@ -250,24 +250,31 @@ fun PokemonDetailStateWrapper(
 ) {
 
     var pokemonFlavourText by remember {
-        mutableStateOf("")
+        mutableStateOf("Loading...")
+    }
+
+    var isFlavorTextLoading by remember {
+        mutableStateOf(true)
     }
 
     when (pokemonInfo) {
         is Resource.Success -> {
 
-            if (pokemonSpecies is Resource.Success) {
+            if (pokemonSpecies is Resource.Success && isFlavorTextLoading) {
                 val flavorTextEntries = pokemonSpecies.data.flavor_text_entries.filter { it.language.name == "en" }
                 pokemonFlavourText = flavorTextEntries.randomOrNull()
                     ?.flavor_text?.replace("\n", " ") ?: "No description"
+                isFlavorTextLoading = false
             }
 
-            PokemonDetailSection(
-                pokemonInfo = pokemonInfo.data,
-                pokemonFlavourText = pokemonFlavourText,
-                dominantColor = dominantColor,
-                modifier = modifier
-            )
+            if(!isFlavorTextLoading) {
+                PokemonDetailSection(
+                    pokemonInfo = pokemonInfo.data,
+                    pokemonFlavourText = pokemonFlavourText,
+                    dominantColor = dominantColor,
+                    modifier = modifier
+                )
+            }
         }
         is Resource.Error -> {
             Text(
