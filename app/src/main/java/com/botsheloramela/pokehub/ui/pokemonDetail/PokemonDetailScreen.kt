@@ -56,6 +56,7 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.botsheloramela.pokehub.data.model.Pokemon
+import com.botsheloramela.pokehub.data.model.PokemonSpecies
 import com.botsheloramela.pokehub.data.model.Type
 import com.botsheloramela.pokehub.util.Resource
 import com.botsheloramela.pokehub.util.parseStatToAbbr
@@ -77,6 +78,10 @@ fun PokemonDetailScreen(
         value = viewModel.getPokemonInfo(pokemonName)
     }.value
 
+    val pokemonSpecies = produceState<Resource<PokemonSpecies>>(initialValue = Resource.Loading()) {
+        value = viewModel.getPokemonSpeciesInfo(pokemonName)
+    }.value
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(dominantColor)
@@ -87,6 +92,7 @@ fun PokemonDetailScreen(
 
         PokemonDetailStateWrapper(
             pokemonInfo = pokemonInfo,
+            pokemonSpecies = pokemonSpecies,
             dominantColor = dominantColor,
             modifier = Modifier
                 .fillMaxSize()
@@ -108,7 +114,7 @@ fun PokemonDetailScreen(
         Box(contentAlignment = Alignment.TopCenter,
             modifier = Modifier.fillMaxSize()
         ) {
-            if (pokemonInfo is Resource.Success) {
+            if (pokemonInfo is Resource.Success && pokemonSpecies is Resource.Success) {
                 pokemonInfo.data.sprites.other.home.let {
                     PokemonSummarySection(
                         pokemonName = pokemonInfo.data.name,
@@ -237,28 +243,44 @@ fun PokemonDetailAppBar(
 @Composable
 fun PokemonDetailStateWrapper(
     pokemonInfo: Resource<Pokemon>,
+    pokemonSpecies: Resource<PokemonSpecies>,
     dominantColor: Color,
     modifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
 ) {
+
+    var pokemonFlavourText by remember {
+        mutableStateOf("")
+    }
+
     when (pokemonInfo) {
         is Resource.Success -> {
+
+            if (pokemonSpecies is Resource.Success) {
+                val flavorTextEntries = pokemonSpecies.data.flavor_text_entries.filter { it.language.name == "en" }
+                pokemonFlavourText = flavorTextEntries.randomOrNull()
+                    ?.flavor_text?.replace("\n", " ") ?: "No description"
+            }
+
             PokemonDetailSection(
                 pokemonInfo = pokemonInfo.data,
+                pokemonFlavourText = pokemonFlavourText,
                 dominantColor = dominantColor,
                 modifier = modifier
             )
         }
         is Resource.Error -> {
             Text(
-                text = pokemonInfo.message,
-                color = MaterialTheme.colorScheme.error,
+                text = "An error occurred",
+                color = Color.Red,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
                 modifier = modifier
             )
         }
         is Resource.Loading -> {
             CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary,
+                color = dominantColor,
                 modifier = loadingModifier
             )
         }
@@ -269,6 +291,7 @@ fun PokemonDetailStateWrapper(
 @Composable
 fun PokemonDetailSection(
     pokemonInfo: Pokemon,
+    pokemonFlavourText: String,
     dominantColor: Color,
     modifier: Modifier
 ) {
@@ -339,22 +362,23 @@ fun PokemonDetailSection(
                 .padding(top = 16.dp)
 
         ) {page ->
-            Column {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 if (page == 0) {
                     PokemonDetailDataSection(
                         pokemonWeight = pokemonInfo.weight,
                         pokemonHeight = pokemonInfo.height,
                         dominantColor = dominantColor
                     )
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
                     Text(
-                        text = "Base Stats",
+                        text = pokemonFlavourText,
                         color = Color.Gray,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
                     PokemonBaseStats(pokemonInfo = pokemonInfo, dominantColor = dominantColor)
                 }
             }
@@ -451,7 +475,9 @@ fun PokemonStat(
     Row (
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

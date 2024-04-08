@@ -11,7 +11,8 @@ data class Pokemon(
     val sprites: Sprites,
     val stats: List<Stat>,
     val types: List<Type>,
-    val imageUrl : String
+    val imageUrl: String,
+    val species: PokemonSpecies
 )
 
 data class PokemonItemModel(
@@ -25,4 +26,18 @@ data class PokemonList(
     val next: String,
     val previous: Any,
     val results: List<Result>
+)
+
+data class PokemonSpecies(
+    val flavor_text_entries: List<FlavorTextEntry>
+)
+
+data class FlavorTextEntry(
+    val flavor_text: String,
+    val language: Language
+)
+
+data class Language(
+    val name: String,
+    val url: String
 )
