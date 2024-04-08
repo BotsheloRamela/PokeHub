@@ -347,6 +347,14 @@ fun PokemonDetailSection(
                         dominantColor = dominantColor
                     )
                     Spacer(modifier = Modifier.height(28.dp))
+                    Text(
+                        text = "Base Stats",
+                        color = Color.Gray,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    Spacer(modifier = Modifier.height(28.dp))
                     PokemonBaseStats(pokemonInfo = pokemonInfo, dominantColor = dominantColor)
                 }
             }
