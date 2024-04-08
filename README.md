@@ -32,10 +32,10 @@ The PokeHub app follows the MVVM (Model-View-ViewModel) architecture pattern wit
 
 ## Screenshots
 <p>
-    <img src="screenshots/PokeHub_Light.png" style="max-width: 25%; height: auto;" alt="Screenshot 1"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-    <img src="screenshots/PokeHub_PokeInfo_Light.png" style="max-width: 25%; height: auto;" alt="Screenshot 2"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-    <img src="screenshots/PokeHub_Dark.png" style="max-width: 25%; height: auto;" alt="Screenshot 3"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-    <img src="screenshots/PokeHub_PokeInfo_Dark.png" style="max-width: 25%; height: auto;" alt="Screenshot 4"/>
+    <img src="screenshots/PokeHub_Light.png" width="345" height="732" alt="Screenshot 1"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    <img src="screenshots/PokeHub_PokeInfo_Light.png" width="345" height="732" alt="Screenshot 2"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    <img src="screenshots/PokeHub_Dark.png" width="345" height="732" alt="Screenshot 3"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    <img src="screenshots/PokeHub_PokeInfo_Dark.png" width="345" height="732" alt="Screenshot 4"/>
 </p>
 
 
