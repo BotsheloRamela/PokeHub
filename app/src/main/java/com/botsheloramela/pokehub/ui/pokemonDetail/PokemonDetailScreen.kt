@@ -4,6 +4,7 @@ import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +27,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,18 +46,25 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.botsheloramela.pokehub.R
 import com.botsheloramela.pokehub.data.model.Pokemon
 import com.botsheloramela.pokehub.data.model.PokemonSpecies
 import com.botsheloramela.pokehub.data.model.Type
@@ -116,6 +126,18 @@ fun PokemonDetailScreen(
         ) {
             if (pokemonInfo is Resource.Success && pokemonSpecies is Resource.Success) {
                 pokemonInfo.data.sprites.other.home.let {
+                    Box(
+                        modifier = Modifier.offset(y = 145.dp, x = 60.dp).rotate(20f).zIndex(0f)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.pokedex_logo),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(250.dp)
+                                .aspectRatio(1.6f)
+                                .alpha(0.4f)
+                        )
+                    }
                     PokemonSummarySection(
                         pokemonName = pokemonInfo.data.name,
                         pokemonId = pokemonInfo.data.id,
@@ -123,17 +145,19 @@ fun PokemonDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .offset(y = 70.dp)
+                            .zIndex(2f)
                     )
-                     SubcomposeAsyncImage(
-                         model = ImageRequest.Builder(LocalContext.current)
-                             .data(it.front_default)
-                             .crossfade(true)
-                             .build(),
-                         contentDescription = pokemonInfo.data.name,
-                         modifier = Modifier
-                             .size(pokemonImageSize)
-                             .offset(y = 180.dp)
-                     )
+
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(it.front_default)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = pokemonInfo.data.name,
+                        modifier = Modifier
+                            .size(pokemonImageSize)
+                            .offset(y = 180.dp)
+                    )
                 }
             }
         }
@@ -378,7 +402,7 @@ fun PokemonDetailSection(
                         pokemonHeight = pokemonInfo.height,
                         dominantColor = dominantColor
                     )
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
                     Text(
                         text = pokemonFlavourText,
                         color = Color.Gray,
