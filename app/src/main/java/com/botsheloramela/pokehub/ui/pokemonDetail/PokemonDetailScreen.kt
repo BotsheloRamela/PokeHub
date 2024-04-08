@@ -302,7 +302,7 @@ fun PokemonDetailSection(
     dominantColor: Color,
     modifier: Modifier
 ) {
-    val tabItems = listOf("Info", "Evolution", "Moves")
+    val tabItems = listOf("Info") // TODO: Add "Evolutions" and "Moves" tabs
 
     val pagerState = rememberPagerState(
         pageCount = { tabItems.size }
