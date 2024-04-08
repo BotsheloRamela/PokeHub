@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AssistChipDefaults
@@ -127,7 +129,10 @@ fun PokemonDetailScreen(
             if (pokemonInfo is Resource.Success && pokemonSpecies is Resource.Success) {
                 pokemonInfo.data.sprites.other.home.let {
                     Box(
-                        modifier = Modifier.offset(y = 145.dp, x = 60.dp).rotate(20f).zIndex(0f)
+                        modifier = Modifier
+                            .offset(y = 145.dp, x = 60.dp)
+                            .rotate(20f)
+                            .zIndex(0f)
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.pokedex_logo),
@@ -135,7 +140,7 @@ fun PokemonDetailScreen(
                             modifier = Modifier
                                 .size(250.dp)
                                 .aspectRatio(1.6f)
-                                .alpha(0.4f)
+                                .alpha(0.3f)
                         )
                     }
                     PokemonSummarySection(
@@ -338,6 +343,7 @@ fun PokemonDetailSection(
         modifier = modifier
             .fillMaxSize()
             .padding(top = 28.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
@@ -411,6 +417,7 @@ fun PokemonDetailSection(
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                     PokemonBaseStats(pokemonInfo = pokemonInfo, dominantColor = dominantColor)
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
