@@ -5,7 +5,7 @@ PokeHub is an Android application designed for Pokémon enthusiasts to explore i
 - View a list of Pokémon species with their basic information.
 - Search for specific Pokémon by name.
 - View detailed information about individual Pokémon.
-- Explore images of Pokémon, including their default and shiny sprites.
+- Explore images of Pokémon.
 - Utilizes Dagger Hilt for dependency injection.
 - Uses Coil for efficient image loading.
 - Integrates Retrofit for making network requests to the PokeAPI.
